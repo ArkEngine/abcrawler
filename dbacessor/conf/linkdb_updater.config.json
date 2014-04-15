@@ -1,0 +1,14 @@
+{
+    "server_config":
+    {
+        "port"     : 2011
+    },
+    "mysql_config":
+    {
+        "host"     : "127.0.0.1",
+        "port"     : 3306,
+        "database" : "yaopin",
+        "username" : "worker",
+        "password" : "worker"
+    }
+}

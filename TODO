@@ -1,0 +1,25 @@
+[1] accept thread - 负责accept请求，把读取请求后，放入域名的链接队列中，等待工作线程来取连接。还要设置域名的定时器
+[2] worker thread - 负责抓取网页，把网页简单解析后放入写入队列中
+[3] writer thread - 负责写入磁盘中
+[4] sender thread - 负责把磁盘文件发送到远程服务
+--------------------------
+[DONE] [01] 302跳转
+[TODO] [02] libevent的segbug和死循环bug 可以搜索相关代码，看看别人是怎么写的
+[DONE] [03] python编写出更新mongodb和抽取连接的pyec
+[DONE] [04] 回调参数的释放问题
+[DONE] [05] dns解析还存在问题，dnscache势在必行
+[TODO] [06] 当并行抓取的连接过多时，需要设置ulimit中对open files的限制
+[DONE] [07] gzip压缩出错??!! 你没有判断输入buffer的长度! asshole
+[DONE] [08] 优雅退出，需要关闭listen端口，保存host_link中的待抓取链接，和完成已经在抓取的部分，以及最后全部写入文件中
+[TODO] [09] 页面类型识别
+            - 抽出<anchor, url>对，对anchor中序号进行整理，如果能正序连续出现，则为索引页面
+            - 抽出<anchor, url>对，并统计区域文本数，然后计算anchor占比，比例过高则为索引页面
+            - 对已经识别出的页面，如果一个页面指向太多详细页面，则为索引页面
+            - 如果存在多个anchor指向书名，则为索引页(二级索引页)
+            - 如果存在多个anchor指向章节名，且为一本书下面的章节，则为该本书的章节索引页面
+[DONE] [10] 重试策略
+           - 在crawling_thread中对status-code进行判断，如果是5xx，则扔回去，继续重试，有次数限制
+           - 在crawling_thread中，如果req==NULL，则扔回去重新抓取
+[TODO] [11] 添加refer失败
+                 
+http://www.dawenxue.net/html/71/71869/index.html 提取超链的bug, 太短的相对地址

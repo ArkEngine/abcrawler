@@ -1,0 +1,20 @@
+{
+    "host_crawling_control":
+    {
+        "www.haodf.com":
+        {
+           "max_crawling_number":10,
+            "crawling_number_by_minute" : 60
+        },
+        "www.the520.cn":
+        {
+           "max_crawling_number":5,
+            "crawling_number_by_minute" : 30
+        },
+        "www.baidu.com":
+        {
+            "max_crawling_number":5,
+            "crawling_number_by_minute": 30
+        }
+    }
+}

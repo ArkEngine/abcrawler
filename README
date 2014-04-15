@@ -1,0 +1,33 @@
+--系统简介--
+--模块介绍--
+----evcrawler
+------基于libevent中的evhttp的抓取器
+      --支持按照host的压力控制
+      --支持dns cache
+      --支持多线程的异步并发抓取
+      --支持抓取状态统计
+      --支持抓取数据持久化
+----sender
+------负责把抓取到的数据发送到远程接受者(link_db_updater.py和page_db_updater)
+      evcrawler把抓取到的数据写入以filelinkblock形式组织的数据中，sender负责读取filelinkblock中的数据，发送给接受者。
+      sender的特性如下:
+      --支持进度记录，进度文件在offset目录下
+      --支持区分消息类型，目前只有一类消息，即'event 0 # 0'
+      --支持消息回滚(抓取系统中没有用到这个特性)
+      --可以监控offset中的进度文件，来判断下游接受者是否工作正常，存在消息延迟。
+----link_db_updater.py
+------负责接受sender发送的网页数据，分析网页数据，更新此次抓取的url信息，并分析页面，提取新发现的url并插入到link_info表中
+------link_db_updater.py使用到了link_info表中的uniq_url_sign索引，该索引用于url去重，和选取出refer_sign对应的url。
+----page_db_updater.py
+------负责接受sender发送的网页数据，以md5sum(url)为key，把网页数据以及meta信息插入到mongodb中
+----selector.py
+------定期读取evcrawler中的统计信息，根据每个host的统计信息，从link_info表中选取该host下的连接，发送到evcrawler中进行抓取
+      --selector会记录每个host选取到的最大url_no，每次会以此最大的url_no开始来选取待抓取的url.(当前的调度策略是仅仅抓取新连接)
+------selector.py使用到了link_info表中的host_no索引。
+----stator.py
+------供调试所用，可以显示evcrawler中各个站点的待抓取队列长度，当前并发抓取数目等信息
+--部署说明--
+  -1- 把该域名的种子url插入到数据库的host_info和link_info表中
+  -2- 在evcrawler的配置host_visit_interval.config.json中增加某个域名的配置信息，重启evcrawler
+TODO
+增加每分钟的抓取量控制，与并发控制相结合

@@ -1,0 +1,4 @@
+为了让diskset发挥更好的性能，采用python扩展的方式，放弃了socket远程服务的方式。
+扩展有两个方案
+[1] swig方案，(需要安装swig)运行sh make.sh即可，生成diskset.py和_diskset.so，复制这两个文件到相应目录即可使用，性能稍差，千万数据量下，插入6万/s，读取60万/s
+[2] 原始方案，运行sh mm.sh即可，生成raw_diskset.py和pydiskset.so， 复制(把raw_diskset.py改名为diskset.py)这两个文件到相应目录即可使用，性能较好，亿级别数据量下，插入10万/s，读取100万/s
