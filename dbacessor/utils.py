@@ -4,6 +4,14 @@ import json
 import re, sys, time
 
 def get_links(page_content, host = None, inhost = True, base_url = None):
+    #w3.org http://www.w3.org/TR/WD-html40-970708/htmlweb.html#relative-urls
+    #<BASE href="http://www.barre.fr/fou/intro.html">
+    #<base href="http://www.lingshikong.com/" />
+    base_match = re.match(r'.*?<base\s+?href="(.*?)".*?>.*',page_content, flags=re.I)
+    if base_match:
+        base_url = base_match.group(1)
+    base_url = base_url[0: base_url.rfind('/')] + '/'
+
     # 将正则表达式编译成Pattern对象
     filter_head = None
     if host: filter_head = 'http://%s' % host
@@ -46,11 +54,12 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
                 url = filter_head + url
             if base_url and not url.startswith('/') and not url.startswith('http://'):
                 url = base_url[:base_url.rfind('/')+1]+url
-            if len(url) < len(filter_head):
-                #print '-- too short skip', url
-                continue
-            elif inhost and url[:len(filter_head)] != filter_head:
+
+            if inhost and url[:len(filter_head)] != filter_head:
                 #print '-- not begin head skip', url
+                continue
+            elif len(url) < len(filter_head):
+                #print '-- too short skip', url
                 continue
             elif url == filter_head + '/':
                 #print '-- same url skip', url
@@ -73,6 +82,8 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
                 index = url.find('doctor')
                 if 1 == url[index:].count('/'):
                     url_set.add(url)
+        elif  host == 'www.lingshikong.com':
+            url_set.add(url)
         #elif host == 'club.xywy.com':
         #    # club.xywy.com下，带juhe的不要
         #    if -1 != url.find('juhe') or -1 != url.find('yaopin'):
