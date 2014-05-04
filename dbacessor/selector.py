@@ -70,12 +70,11 @@ if __name__ == '__main__':
     while True:
         host_info = get_all_host_no(linkdb_logic,)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(("127.0.0.1", 2008));
+        sock.connect(config['crawler_config']['host'], config['crawler_config']['port'])
         log_count += 1
         status, stat_dict = xRequest(sock, log_id = log_count, status = 1)
         assert status == 0
         for host,stat_info in stat_dict.items():
-            if host == 'www.baidu.com': continue
             #{u'queue_length': 1490, u'max_crawling_number': 250, u'pick_url_interval_ms': 200, u'crawling_number': 250}
             # 保持queue_length在300以上，这样可以够crawler喝个5分钟的。
             # 当queue_length在200一下时，开始补齐到300以上

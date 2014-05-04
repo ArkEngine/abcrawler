@@ -1,7 +1,8 @@
 {
-    "server_config":
+    "crawler_config":
     {
-        "port"     : 7011
+        "host"     : "127.0.0.1",
+        "port"     : "7008"
     },
     "mysql_config":
     {
