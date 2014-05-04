@@ -7,6 +7,9 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
     #w3.org http://www.w3.org/TR/WD-html40-970708/htmlweb.html#relative-urls
     #<BASE href="http://www.barre.fr/fou/intro.html">
     #<base href="http://www.lingshikong.com/" />
+    
+    refer_url = base_url
+    print 'refer_url:', refer_url
     base_match = re.match(r'.*?<base\s+?href="(.*?)".*?>.*',page_content, flags=re.I)
     if base_match:
         base_url = base_match.group(1)
@@ -14,57 +17,44 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
 
     # 将正则表达式编译成Pattern对象
     filter_head = None
-    if host: filter_head = 'http://%s' % host
-
-    pattern = re.compile(r'<a.*?href=(.+?)["|\'][^>]*?>', flags=re.I | re.DOTALL)
-    #pattern = re.compile(r'<a.+?href=(.+?)>\s*?(.*?)\s*?</a>', flags=re.I | re.DOTALL)
-    #pattern = re.compile(r'<a.+?href=(.+?)>\s*?(.*?)\s*?</a>', flags=re.IGNORECASE | re.DOTALL | re.DEBUG)
-    #follow_url_list = pattern.findall(page_content.replace('\n', ''))
+    if host: 
+        filter_head = 'http://%s' % host
+    print 'filter_head:', filter_head
+    pattern = re.compile(r'<a.*?href=["|\']([^"|^\']+?)["|\'][^>]*?>', flags=re.I | re.DOTALL)
+    protocol_pattern = re.compile(r'^(http|https|ftp|mailto|javascript|ssh?):.*$', flags=re.I)
     follow_url_list = pattern.findall(page_content.replace('\n', ''))
     url_set = set([])
     for y in range(len(follow_url_list)):
-        # url 要么是http开头，要么是/开头
-        #print follow_url_list[y][0]
-        if follow_url_list[y].strip() == '' or follow_url_list[y].strip() == '\\':
+        candidate_url = follow_url_list[y].strip()
+        protocol_match = protocol_pattern.match(candidate_url)
+        if protocol_match and not (protocol_match.group(1) in ['http', 'https']):
+            #print 'not http or https', candidate_url
             continue
-        http_start = follow_url_list[y].find('http://')
-        if http_start != -1:
-            if http_start < 5:
-                url = follow_url_list[y][http_start:]
-                #print 'got http:', url
+        
+        #filter illegal url
+        if candidate_url == '' or candidate_url == '\\':
+            continue
+        
+        if not protocol_match:
+            if candidate_url.startswith('/'):
+                candidate_url = '%s%s' % (filter_head, candidate_url)
             else:
-                continue
-        elif follow_url_list[y].find('"') == 0:
-            url = follow_url_list[y][1:]
-        else:
-            slash_start = follow_url_list[y].find('/')
-            if slash_start != -1:
-                if slash_start < 5:
-                    url = follow_url_list[y][slash_start:]
-                    #print 'got ////:', url
-                else:
-                    continue
+                candidate_url = '%s%s' % (base_url, candidate_url)
+        url = candidate_url
         url = url.replace('\'', '').replace('"', '').split(' ')[0].split('?')[0].split('<')[0].split('#')[0]
-        #print follow_url_list[y][0].strip(), url, len(url)
+        
+        #filter url not in the host
+        if inhost and not url.startswith(filter_head):
+            continue
+
         if not is_valid_url(url):
             #print '-- same url skip', url
             continue
-        if filter_head:
-            if url.startswith('/'):
-                url = filter_head + url
-            if base_url and not url.startswith('/') and not url.startswith('http://'):
-                url = base_url[:base_url.rfind('/')+1]+url
 
-            if inhost and url[:len(filter_head)] != filter_head:
-                #print '-- not begin head skip', url
-                continue
-            elif len(url) < len(filter_head):
-                #print '-- too short skip', url
-                continue
-            elif url == filter_head + '/':
-                #print '-- same url skip', url
-                continue
-        #print url, follow_url_list[y][1]
+        #conv http://a.cn/ to http://a.cn
+        if filter_head and url == filter_head + '/':
+            url = filter_head
+
         if   host == 'www.baidu.com':
             continue 
         if   host == 'www.haodf.com':
@@ -84,32 +74,8 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
                     url_set.add(url)
         elif  host == 'www.lingshikong.com':
             url_set.add(url)
-        #elif host == 'club.xywy.com':
-        #    # club.xywy.com下，带juhe的不要
-        #    if -1 != url.find('juhe') or -1 != url.find('yaopin'):
-        #        continue
-        #    if -1 != url.find('static') and -1 != url.find('target'):
-        #        url = url.split('target')[0]
-        #    url_set.add(url)
-        #elif host == 'www.120ask.com':
-        #    # 120ask.com, user不要
-        #    if -1 != url.find('user'):
-        #        pass
-        #    elif -1 != url.find('list'):
-        #        url_set.add(url)
-        #    elif -1 != url.find('question'):
-        #        if -1 != url.find('target'):
-        #            url = url.split('target')[0]
-        #        lst = url.split('/')
-        #        # 120ask.com存在重复url的情况
-        #        # http://www.120ask.com/question/重复的原因/39064609.htm
-        #        if lst[-1].split('.')[0].isdigit():
-        #            url_set.add('http://www.120ask.com/question/'+lst[-1])
-        #else:
-        #    # 默认全部加入扩展
-        #    url_set.add(url)
-        #    pass
- 
+        elif  host == 'www.guahao.com':
+            url_set.add(url)
         #print url
         #txt = follow_url_list[y][1]
         #print 'url:[%s], txt:[%s]' % (url, txt,)
