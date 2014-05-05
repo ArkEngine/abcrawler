@@ -9,8 +9,7 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
     #<base href="http://www.lingshikong.com/" />
     
     refer_url = base_url
-    print 'refer_url:', refer_url
-    base_match = re.match(r'.*?<base\s+?href="(.*?)".*?>.*',page_content, flags=re.I)
+    base_match = re.match(r'.*?<base\s+?href="(.*?)".*?>.*',page_content, flags=re.I|re.S)
     if base_match:
         base_url = base_match.group(1)
     base_url = base_url[0: base_url.rfind('/')] + '/'
@@ -19,7 +18,6 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
     filter_head = None
     if host: 
         filter_head = 'http://%s' % host
-    print 'filter_head:', filter_head
     pattern = re.compile(r'<a.*?href=["|\']([^"|^\']+?)["|\'][^>]*?>', flags=re.I | re.DOTALL)
     protocol_pattern = re.compile(r'^(http|https|ftp|mailto|javascript|ssh?):.*$', flags=re.I)
     follow_url_list = pattern.findall(page_content.replace('\n', ''))
@@ -75,7 +73,19 @@ def get_links(page_content, host = None, inhost = True, base_url = None):
         elif  host == 'www.lingshikong.com':
             url_set.add(url)
         elif  host == 'www.guahao.com':
-            url_set.add(url)
+            if re.match(r'http://www.guahao.com/hospital/0ba4a4af-6a09-47ef-8bc6-6ecd1a7d3bb4', url):
+                url_set.add(url)
+            elif re.match(r'http://www.guahao.com/hospital/desc/[0-9a-z\-]+', url):
+                url_set.add(url)
+            elif re.match(r'http://www.guahao.com/department/\d+', url):
+                url_set.add(url)
+            elif re.match(r'http://www.guahao.com/department/shiftcase/\d+', url):
+                url_set.add(url) 
+            elif re.match(r'http://www.guahao.com/department/shiftcase/\d+?pageNo=\d+', url):
+                url_set.add(url)
+            elif re.match(r'http://www.guahao.com/expert/\d+?hospDeptId=\d+', url):
+                url_set.add(url)
+                
         #print url
         #txt = follow_url_list[y][1]
         #print 'url:[%s], txt:[%s]' % (url, txt,)
