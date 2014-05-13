@@ -2,13 +2,13 @@
     "crawler_config":
     {
         "host"     : "127.0.0.1",
-        "port"     : "7008"
+        "port"     : 7008
     },
     "mysql_config":
     {
         "host"     : "127.0.0.1",
         "port"     : 3306,
-        "database" : "crawler_test",
+        "database" : "baidu_query_crawler",
         "username" : "worker",
         "password" : "worker"
     }

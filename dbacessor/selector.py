@@ -70,7 +70,7 @@ if __name__ == '__main__':
     while True:
         host_info = get_all_host_no(linkdb_logic,)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(config['crawler_config']['host'], config['crawler_config']['port'])
+        sock.connect((config['crawler_config']['host'], config['crawler_config']['port']))
         log_count += 1
         status, stat_dict = xRequest(sock, log_id = log_count, status = 1)
         assert status == 0
