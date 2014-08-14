@@ -138,7 +138,7 @@ void filelinkblock:: check_and_repaire()
         MySuicideAssert(readoff == (uint32_t)lseek(flb_r_fd, readoff, SEEK_SET));
         // 从 readoff 位置读取数据直到文件末尾
         MySuicideAssert((int)readlen == read (flb_r_fd, tmpbuf, readlen));
-        int step = readlen/sizeof(uint32_t);
+        int step = readlen/(int)sizeof(uint32_t);
         while (--step >= 0)
         {
             if (tmpbuf[step] == MAGIC_NUM)
