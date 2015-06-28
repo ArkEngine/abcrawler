@@ -31,3 +31,5 @@
   -2- 在evcrawler的配置host_visit_interval.config.json中增加某个域名的配置信息，重启evcrawler
 TODO
 增加每分钟的抓取量控制，与并发控制相结合
+
+Join the chat at https://gitter.im/ArkEngine/abcrawler
